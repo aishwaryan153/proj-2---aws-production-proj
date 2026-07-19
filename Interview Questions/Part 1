@@ -4,4 +4,148 @@ A: It's an end to end production style application on AWS where i deployed a doc
    to s3 bucket for backup. In this project i gained experience on Linux, aws services, docker, git, monitoring
 
 2. Explain more about project step by step
-A: 
+A: Its an aws production style flask application
+   1. I launched an ec2, cloned the project from github and installed docker and ran docker to convert the docker file to docker image and then ran the application in
+      docker container
+   2. Instead of exposing flask directly to users, i configured nginx as reverse proxy , so now nginx listens on port 80, forwards request to flask application on port
+      5000 
+   3. To have distributed traffic, i created ami of the ec2, launched a second ec2 using that ami and then i added load balancers to the both ec2's.
+   4. To handle high traffic, i also added auto scaling group
+   5. For monitoring i installed cloud watch agent in ec2 to collect the monitoring metrics from ec2 and then send to aws cloud watch
+   6. I configured sns, cloud watch alarms to get cloud watch alarms when something exceeds the limit
+   7. Finally i created encrypted and versioned s3 bucket and stored backup of configuration and log files
+
+3. Architecture of project
+A: Developer
+     │
+GitHub Repository
+     │
+Git Clone
+     │
+EC2 Instance (Ubuntu)
+     │
+Docker Container
+     │
+Flask App (Port 5000)
+     │
+Nginx Reverse Proxy (Port 80)
+     │
+Application Load Balancer
+     │
+Users
+
+             │
+             │
+     Auto Scaling Group
+             │
+      Launch Template
+             │
+            AMI
+
+CloudWatch Agent
+      │
+CloudWatch
+      │
+SNS Email
+
+S3 Bucket
+(Backups + Versioning + Encryption)
+
+4. Why flask?
+A: it is light weight and easy to deploy for devops projects. i used this because i dint have to build a complex application, i just had to focus on infrastructre,
+   containerization, monintoring, deployment and scaling. I dint use Django framework because it is a full stack framework with many built in features like ORM and
+   authentication. I just needed a simple application so i used flask.
+
+5. Why Docker?
+A: Docker packages the application with its dependencies into a container. This ensures that the application behaves consistently accross all dev, test, prod phases.
+   thus eliminating "it only works only machine" issues. Its also portable, lightweight, easy deployment
+
+6. Explain Docker Architecture
+A: It has 3 main components: docker client, docker daemon, docker registry
+   Docker client: users execute docker commands like docker build, docker run
+   Docker Daemon : runs in backgroud, builds the images, containers, manages networking and storage
+   Docker Registry: stores all the docker images. Ex: Docker hub, Amazon ECR
+
+7. Diff btwn docker image and docker container
+A: Docker image: Template, read only, static
+   Docker container: Running instance, read and write, dynamic
+      Once an image is created we can create many containers from one image. Ex: Image: Blueprint, Container: House
+
+8. Explain your docker file
+A: My docker file:
+      FROM python:3.11
+      WORKDIR /app
+      COPY . .
+      RUN pip install -r requirements.txt
+      EXPOSE 5000
+      CMD ["python","app.py"]
+   1. From python means use the python3.11 image as base
+   2. workdir/app means sets the working directory as /app inside the container
+   3. Copy . . means copies the project files into the container
+   4. Run pip line: installs python dependencies from requirements.txt file
+   5. expose 5000: tells the application to listen to port 5000
+   6. cmd : start the flask application when container launches
+
+9. cmd vs entry point
+A: cmd : default command, can be overriden easily
+   entry point: fixed executable, always executed
+      Ex: Example:
+            CMD ["python","app.py"]
+            can be overridden:
+            docker run image bash
+            ENTRYPOINT cannot be easily replaced without using --entrypoint.
+
+10. copy vs add
+A: copy: copies local files into the image
+   add: can also extract local archives automatically and fetch files from url's
+      use copy only, unless you specifically need to use add
+
+11. Why expose port 5000?
+A: Flask listens to port 5000, so when users open the website, nginx recieves the signal on port 80 and then forwards to flask on port 5000
+
+12. Why dint u expose port 5000 directly?
+A: Using nginx as a reverse proxy has many benefits: users dont enter port numbers, better security by hiding the aplication server, improved performance
+
+13. Explain docker build
+A: command: docker build -t app1 .
+      this command reads the docker file, downloads the base image if needed, executes each command layer by layer, builds the image, names the image as app1 and . for
+      current folder
+
+14. Explain docker run
+A: Command:docker run -d -p 5000:5000 app1
+      creates a container from the app1 image, maps host port 5000 to container port 5000, -d for detach mode
+
+15. Explain the commands
+A: docker ps --> lists the current running containers
+   docker ps -a --> lists all running, stopped containers 
+   docker images --> gives list of all docker images stored locally
+   docker logs <container> --> shows the application logs of that container
+   docker exec -it <container> bash --> opens an interactive shell inside the container
+   docker stop <container> --> stops the running container
+   docker start <container> --> starts the stopped container
+   docker restart <container> --> stops and starts the container
+   docoker rm <container> --> removes the stopped container
+   docker rmi <image> --> removes the docker image if no container depends on it
+
+16. How to check logs?
+A: Container logs : docker logs <container-id>
+   nginx logs: tail -f /var/log/nginx/error.log
+               tail -f /var/log/nginx/access.log
+   System services: journalctl -u nginx
+                    journalctl -u docker
+
+17. Diff between nginx restart and nginx reload
+A: systemctl restart nginx --> stops and starts the nginx service, existing connections are interrupted
+   systemctl reload nginx --> reloads the configuration without stopping the service, existing connections are not interrupted
+
+18. Challenge in your project?
+A: It was troubleshooting HTTP 502 and 503 errors.I systematically checked the Docker container status, verified the Flask application was listening on the 
+   correct port, reviewed Nginx configuration and logs, validated security group rules, and confirmed the ALB health check path and port. I had to always run 
+   the docker container again to solve this issue. By isolating each layer of the architecture, I identified the root cause and restored the application. 
+   This experience improved my troubleshooting and production debugging skills
+
+
+
+
+                  
+
