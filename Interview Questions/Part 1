@@ -1,0 +1,7 @@
+1. Describe Project
+A: It's an end to end production style application on AWS where i deployed a dockerized flask application on ec2, configured nginx as reverse proxy, placed it
+   behind application load balancer, added auto scaling group, monitoring using cloud watch and setup sns notification and added the logs and configuration files
+   to s3 bucket for backup. In this project i gained experience on Linux, aws services, docker, git, monitoring
+
+2. Explain more about project step by step
+A: 
