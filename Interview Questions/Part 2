@@ -58,4 +58,46 @@ A: ami --> complete machine template, used to launch ec2, includes boot configur
    snapshot --> backup of ebs volume, used to restore storage, storage only
 
 14.What is launch template and why to use a launch template?
-A: launch template definies how we create an ec2, it includes name, os, instance type, sg, key pair, storage
+A: launch template definies how we create an ec2, it includes name, os, instance type, sg, key pair, storage.
+   we create it because: Instead of manually creating EC2 instances each time, the Auto Scaling Group uses the Launch Template to launch identical instances
+   automatically
+
+15. What is ALB and why do we use it?
+A: ALB --> application load balancer is used to divide the incoming traffic between ec2's. it only distributes traffic between the healthy ec2's. 
+
+16. Diff between Alb, nlb, classic lb
+A:  ALB	   NLB	Classic LB
+   Layer 7	Layer 4	Layer 4/7 (legacy)
+   HTTP/HTTPS	TCP/UDP	Basic support
+   URL-based routing	Very high performance	Older generation
+   Web applications	Low-latency services	Legacy applications
+
+17. what is target group?
+A: it is a collection of backend resources like ec2 that recieves traffic from load balancer, it runs health checks to determine whether instances should recieve
+   requests or not
+
+18. what is health checks and which health checks did you configure?
+A: health checks verify periodically if the application is responding correctly or no. if a health check fails then the lb stops sending traffic to it
+   i configured http protocol for port 80
+
+19. why did your target group become unhealthy?
+A: possible reasons --> nginx service stopped, flask application stopped, docker container stopped, wrong port configured, sg blocked traffic
+
+20. You recieved a 502 bad gateway error. what to do?
+A: 502 error means nginx cannot connect with backend application
+   Check : if docker container stopped(shows exited when we give docker ps -a), check flask logs (docker logs <container_id), verify flask listens on 
+   port 5000 (ss -tulpn), restart nginx if required
+
+21. you recieved a 503 service unavailable error, what to do?
+A: 503 error means no healthy target groups in the alb
+   steps : check tg health, verify is ec2 is running, check sg rules, verify that application is running
+
+22. Your ALB is healthy, but the application doesn't load. What do you check?
+A: is nginx running? is docker container running? is flask responding locally ( curl localhost://5000), is sg allowing traffic, is alb and tg configured correctly?
+
+23. ec2 suddenly crashes. what to do?
+A: check if the health checks are marked healthy or unhealthy. if ec2 crashes then alb stops sending traffic to it. because instance has a auto scaling group 
+   connected to it, based on the desired capacity the asg launches a new ec2 with our ami. once health checks are passed requests are sent to the new ec2.
+
+24. why didnt you expose port 5000 publicly?
+A: port 5000 is used internally by flask application. users access the application through nginx on port 80, which provides security and reverse proxy option
