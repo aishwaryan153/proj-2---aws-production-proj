@@ -15,14 +15,47 @@ A: I launched ubuntu ec2 with vpc. i connected using ssh using keypair. I instal
 A: User --> Application load balancer (divides traffic btwn healthy instances) --> EC2 --> Nginx (acts as reverseproxy, get request to port 80 and then forards 
    the requests to port 5000 for flask application running inside docker container )--> Docker container --> Flask 
 
-5. What is keypair, security group?
+5. What is keypair, security group, iam ?
 A: Key pair: it has 2 keys : public and private key, AWS stores the public key and we have the private key. when we try to login aws validates the public key with     
    our private key and then allows us to login to server
    Security group: It acts a virtual firewall to our ec2. it controls the traffic and allows it based on the port we give access to.
+   IAM : it controls the authentication and authorization in aws. it allows secure access to aws resources using users, roles, groups and policies.
 
 6. Diff between sg and nacl?
 A: Security group --> for instance level, only allow rule, stateful, easy to manage
    NACL --> subnet level, allow and deny rules, stateless, little difficult to control
     Stateful means If an inbound request is allowed, the response traffic is automatically allowed without creating an outbound rule
     
-7. 
+7. Diff between iam user, group, role, policies?
+A: Users --> individual identity
+   group --> collection of users
+   role --> temporary permission to aws services
+   policies --> json document defining permissions
+
+8. Why use iam role instead of access keys
+A: IAM roles provide temporary credentials that aws rotates automatically. This is more secure than embedding the access keys in the ec2
+
+9. What permissions did your ec2 need?
+A: cloud watch for monitoring, s3 for backups
+
+10. What is ebs volume? whats the diff between ebs and s3?
+A: ebs --> elastic block storage, it provides storage for the ec2. it acts like a virtual hard disk. in my project, os, docker images, application files, logs
+   were stored in ebs
+   diff --> ebs: block storage, attached through ec2, boot volume
+            s3 : object storage, accessed through api's, backup storage
+
+11. Diff between ebs and instance storage?
+A: ebs --> attached to ec2 so persistent, survives reboot
+   instance storage--> temporary, lost when instance is stopped
+
+12. what is ami? why did you create ami for your project?
+A: ami --> amazon machine image, its used to create ec2. it contains snapshots of the os, application inside it, ebs , and installed softwares
+   i created ami for my project so that i can launch another ec2 with same configuration so that i can attach a load balancer to both the ec2's. i did it so that
+   i can reduce manual effort by doing everything again
+
+13. Diff between ami and snapshot
+A: ami --> complete machine template, used to launch ec2, includes boot configuration.
+   snapshot --> backup of ebs volume, used to restore storage, storage only
+
+14.What is launch template and why to use a launch template?
+A: launch template definies how we create an ec2, it includes name, os, instance type, sg, key pair, storage
