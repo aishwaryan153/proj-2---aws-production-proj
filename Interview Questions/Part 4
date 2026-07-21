@@ -1,0 +1,97 @@
+PART 4: Production Troublshooting
+
+1. Website is down. How to troubleshoot?
+A: Step 1: check availability: is dns working? is alb working?
+   Step 2: Check lb target groups are healthy, alb status, listner configuration
+   Step 3: check ec2: uptime, top, df -h
+   Step 4: check nginx : systemctl status nginx
+   Step 5: check logs, container: docker ps, docker logs <container-id>, curl localhost:5000, tail -f /var/logs/nginx/error.log
+   Step 6: check recent changes: new deployment? congif changes? sg changes?
+
+2. You are getting 502 bad gateway error. how?
+A: 502 error means that proxy server cannot communicate with the backend application
+   Resolve: check if docker container stopped: docker ps -a (if it shows exited means its stopped)
+            if exited then start the container : docker start container-id
+            check application logs: docker logs container-id
+            check flask port: netstat -tulpn
+            test backend: curl localhost:5000 --> if it fails then flask issue, if it passes then nginx issue
+
+3. You are getting 503 service unavailable error. how?
+A: 503 error means load balancer has no healthy targets 
+    check if target group is healthy
+    login to ec2 and check docker ps, systemctl status nginx 
+    check sg and see that port is allowed
+
+4. docker container keeps restarting
+A: First i will check y the container is crashing
+   check status: docker ps -a
+   check logs: docker logs <container-id>
+   check exit code: docker inspect <container-id>
+  Common issues: dependency issue, port conflict, memory issue, missing env variables
+
+5. Docker image size is 5gb, how to reduce it?
+A: --> choose a smaller base image: instead of python:latest use python:3.11-slim
+   --> multi stage build: build dependencies seperately
+   --> remove un-necessary files , use : .dockerignore : ex: .git, _pycache_
+   --> combine run commands
+
+6. ec2 disk usage reaches 100%.
+A: df -h
+   du -sh * to find large files
+   check logs: /var/log
+   docker usage: docker system df
+   cleanup : docker system prune
+   long term solution: increase ebs volume, send logs to cloud watch, configure log rotation
+
+7. ec2 memory reaches 95%
+A: check : free -m
+   check processes: top or htop
+   check the most memory consuming process
+   solution: restart the application, increase instance size, add asg
+
+8. application is slow suddenly, what to check?
+A: check cloud watch for cpu, memory, disk, network
+   check lb: target health, response time, request count
+   check application logs
+   db : check query performance
+   traffic: check sudden traffic increase or no
+
+9. How to automate a deployment?
+A: I will use a CI/CD pipeline where every code change directly goes through build, test and deployment stages
+   Architecture --> developer --> git hub --> jenkins --> docker image --> push to ecr --> deploy to ec2 --> monitoring
+
+10. Explain jenkins pipeline.
+A:  pipeline {
+    stage('Checkout'){
+    }
+    stage('Build'){
+    }
+    stage('Test'){
+    }
+    stage('Docker Build'){
+    }
+    stage('Push Image'){
+    }
+    stage('Deploy'){
+    }
+    }
+
+11. How do you handle failed deployments?
+A: i use rollback strategies
+    Options: Blue green deployment: Old version: A, New Version : B, switch traffic after validation
+             Canary: releases small percentage of new application: 5% users new application, 95% users old application. It monitors this, then does complete rollout.
+
+12. Why move ec2+ docker to k8s?
+A: Docker is for packaging the application, but k8s is for managing the containers at scale.
+   k8s provides: container orchestration, load balancing, scaling, auto healing, rolling updates, service discovery
+
+13. How do you migrate this project to k8s?
+A: current: ec2, docker container, flask
+   conversion to k8s: convert to eks cluster --> deployment --> pods --> service --> ingress --> users
+
+14. Explain k8s architecture
+A: Control plane ( master node): API server, scheduler, controller manager, etcd
+   worker node: kubelet, container runtime, pods
+
+15. diff between docker, k8s
+A: 
