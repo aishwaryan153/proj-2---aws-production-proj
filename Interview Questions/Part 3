@@ -1,0 +1,90 @@
+Part 3: ASG, Cloud Watch, SNS
+
+1. what is asg? and why did you use asg in your project?
+A: asg helps in scaling our servers up and down based on the incomming traffic to the server. we can do horizontal and vertical scaling. it helps maintain 
+   availability, performance and cost optimization. if traffic increases then asg launches new servers and if traffic decreases asg decreases the servers. I used
+   asg in my project for high application availability. Insteaf of manually creating the servers, i used asg to automate the process
+
+2. Explain asg architecture
+A: asg detects failure --> terminates unhealthy instances --> launches new ec2 --> registers with tg --> alb sends traffic
+
+3. Explain Minimum, Desired, and Maximum capacity.
+A: Min : min number of instances that have to be running, if min capacity =2 then mandatory 2 instances will keep running
+   Max : max number of instances that have to be running, if max capacity=4 then max 4 ec2 can run if traffic icreases
+   Desired : the number of instances asg tries to maintain, if desired=3 then asg tries to maintain ec2 count=3
+
+4. what happens when instance fails?
+A: alb will do the health checks and if there is issue with it then that alb stops sending traffic to that ec2. based on the max capacity asg will create new ec2 with
+   the ami so it has same config, and this is attched to the lb and now the new ec2 starts recieving the traffic
+
+5. what is asg policies?
+A: it definies how the asg will remove or add the instances
+    types of policies : target tracking scaling, step scaling, simple scaling
+
+6. explain target tracking scaling
+A: it automatically adjusts the instanes to maintain the target metric value.
+   ex: if cpu target = 70% then whenever the cpu level reaches 70% then it launches new instance, if it decreases less than 70% then new ec2 is removed
+
+7. Diff btwn horizontal and vertical scaling
+A: Horizontal : adds new ec2's 
+   vertical: increases server size
+
+8. What is cloud watch? Why did you use cloud watch in your project?
+A: Cloud watch in aws is a tool used for monitoring the aws resources and creating alarms to get notified. It collects metrics, logs and events
+   I used cloud watch to monitor the health and performance of my ec2. I monitored cpu uti, disk and memory utilization
+
+9. Why do we need cloud watch agent?
+A: By default aws provides basic metrics like cpu utilization we need to install cloud watch agent in our ec2 so that we can get deeper insights of ec2. cloud watch
+   agent gives deeper and os-level metrics and sends them to cloud watch 
+
+10. Diff between default monitoring and and detailed monitoring
+A: Default : limited metrics, 5 min intervals, enabled by default
+   Detailed: more metrics, 1 min intervals, additional cost
+
+11. Explain cloud watch agent architecture
+A: ec2 --> cloud watch agent --> cloud watch metrics --> cloud watch alarm --> sns notification
+
+12. How to install cloud watch agent?
+A: install the cloud watch agent package: sudo apt install cloud-watch-agent
+   Start: sudo systemctl start amazon-cloudwatch-agent
+   Check: systemctl status amazon-cloudwatch-agent
+
+13. Cloud watch agent is not sending metrics, what to do?
+A: check agent status: sudo systemctl status cloud-watch-agent
+   check logs : cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
+   check IAM permissions: ec2 iam role has : CloudWatchAgentServerPolicy 
+   check config file: /opt/aws/amazon-cloudwatch-agent/etc/config.json
+   restart agent: sudo systemctl restart cloud-watch-agent
+
+14. what is cloud watch alarm? explain the cpu alarm you created
+A: its a metrics that monitors and takes action whenever a particular metrics crosses the given threshold
+    Ex: cpu>80% then it triggers the cloud watch alarm and we get SNS notification
+   I created alarm for cpu, so if cpu crosses 80% then i will be notified to my email
+
+15. What are the alarm states?
+A: ok --> metric is normal
+   Alarm --> threshold exceeded
+   Insufficient data --> no data available
+
+16. What is SNS and why did you use SNS? Explain sns flow
+A: SNS stands for simple notification service, Its a messaging service that is used to send notification for the subscribers
+   I used sns to get notified when my cpu crossed the given threshold
+   SNS flow: cloud watch alarm --> sns topic --> email/ Sms/ lambda
+
+17. sns notifiation not recieved. troubleshoot
+A: check: is sns notification subscribed? is cloud watch alarm trigerred? check email spam folder, is sns attached properly
+
+18. why did you use s3? explain your s3 configuration
+A: i used s3 for storing my application logs, config files for backup
+   My s3 configuration: versioning enabled, restricted access using iam policies, server side encryption enabled
+
+19. what is versioning and encryption in s3
+A: versioning: it keeps multiple versions of the stored object so that if one version is deleted we have another for backup
+   encrytption: it protects the stored data from un-authorized access.
+
+20. Diff between s3 backup and ebs backup
+A: s3 --> object storage, stores files, highly scalable
+   ebs --> block storage, stores disk state, attached to ec2
+
+21. cpu utilization is 95% what to do?
+A: 
