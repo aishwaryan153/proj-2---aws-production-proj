@@ -86,5 +86,28 @@ A: versioning: it keeps multiple versions of the stored object so that if one ve
 A: s3 --> object storage, stores files, highly scalable
    ebs --> block storage, stores disk state, attached to ec2
 
-21. cpu utilization is 95% what to do?
-A: 
+21. Cpu utilization is 95% what to do?
+A: check cloud watch metrics --> check logs --> check processes (top command) --> check traffic (asg should scale up) --> if application issue fix code
+
+22. ASG is not launching new instances.
+A: check the capacity 
+
+23. Cloud watch alarm not triggering
+A: check if cloud watch agent is running, iam permission? threshold value?
+
+24. Application logs are missing
+A: is agent running? is log path running? does iam role allow cloud watch logs? check agent config
+
+25. Your manager asks: "How will you make this production-ready?"
+A: i will improve the architecture using:
+   1. Adding https using ACM certificates
+   2. route 53 dns
+   3. cloud front cdn
+   4. private ec2 instances
+   5. nat gateway
+   6. multi a-z database
+   7. secrets manager
+   8. CI/CD pipeline using jenkins
+
+26. Your EC2 instance is terminated accidentally. How recover?
+A: As i already have the ami, i will relaunch the instance. application data and logs i will take from s3 backup
