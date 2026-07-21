@@ -1,0 +1,28 @@
+Part 2 : EC2, IAM, Security Groups, EBS, AMI, Load Balancer, Target Groups & Health Checks
+
+1. Why did you choose ec2 instead of lambda function
+A: I choose ec2 because i needed a persistent linux server where i can install docker, do monitoring,nginx, cloudwatch agent. AWS lambda is serverless and best for 
+   short running event driven functions whereas my application needs continuous execution
+
+2. What is EC2?
+A: Its a server provided by amazon. Its elastic cloud compute. It allows us to launch instances which can be configured with OS, CPU, memory,storage and networking
+
+3. Explain your ec2 setup
+A: I launched ubuntu ec2 with vpc. i connected using ssh using keypair. I installed docker, nginx, cloned the config files from github, built the docker image, ran 
+   the flask application inside the docker container. I then configured nginx as reverse proxy and registered the instance with a load balancer
+
+4. Explain your project request flow
+A: User --> Application load balancer (divides traffic btwn healthy instances) --> EC2 --> Nginx (acts as reverseproxy, get request to port 80 and then forards 
+   the requests to port 5000 for flask application running inside docker container )--> Docker container --> Flask 
+
+5. What is keypair, security group?
+A: Key pair: it has 2 keys : public and private key, AWS stores the public key and we have the private key. when we try to login aws validates the public key with     
+   our private key and then allows us to login to server
+   Security group: It acts a virtual firewall to our ec2. it controls the traffic and allows it based on the port we give access to.
+
+6. Diff between sg and nacl?
+A: Security group --> for instance level, only allow rule, stateful, easy to manage
+   NACL --> subnet level, allow and deny rules, stateless, little difficult to control
+    Stateful means If an inbound request is allowed, the response traffic is automatically allowed without creating an outbound rule
+    
+7. 
