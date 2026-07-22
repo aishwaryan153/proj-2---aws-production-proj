@@ -94,4 +94,40 @@ A: Control plane ( master node): API server, scheduler, controller manager, etcd
    worker node: kubelet, container runtime, pods
 
 15. diff between docker, k8s
-A: 
+A: docker --> creates containers, manual scaling, single host, no self healing
+   k8s --> manages container, auto scaling, multiple host, self healing
+
+16. How do you secure your application?
+A: I implement security in multiple levels
+   Networking: security groups, restricted ports
+   Identity: IAM roles give only needed permissions
+   Data: s3 encryption, ebs encryption
+   Application: https, secure secrets manager
+
+17. How would you store passwords/API keys?
+A: I will never store them in github or docker images, i will store in aws secret manager and retrieve them dynamically during deployment
+
+18. Developer accidentally committed AWS keys to GitHub. What do you do?
+A: i will first deactivate the keys, then delete the exposed keys, create new credentials, check cloud trail for mistakes, remove secrets from repo history,
+   add secret scanning, educate team
+
+19. Traffic increased 20 times suddenly, what to do?
+A: check asg, check cpu nd memory, scale application if needed
+
+20. Your application needs zero downtime deployment. How?
+A: Use Blue-Green or Rolling Deployment. 
+
+21. Manager says move everything to Aws managed services
+A: Current : ec2,docker
+   shifting to aws, we need to use: ecr --> ecs/ekr --> alb --> rds --> cloud watch --> s3
+   Benefits: better server management, easy scalabitlity, management
+
+22. How would you improve your current architecture?
+A: Use route53 for dns, use https listner, private ec2, ci/cd pipeline, multi az db, terraform for infra automation, ecr for docker images
+
+23. Explain a production incident you solved
+A: I faced 502 error, so i needed to check if issue was with docker or nginx, or lb. I saw that docker container status was exited so i restarted the container and
+    then the issue was solved
+
+24. What did you learn from this project?
+A: I gained hands on exp on containerization, monitoring, scaling, troubleshooting
